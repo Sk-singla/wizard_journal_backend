@@ -1,9 +1,11 @@
 package com.samarth.wizardjournal.wizardjournal.services;
 
 import com.samarth.wizardjournal.wizardjournal.dto.LoginRequestDto;
-import com.samarth.wizardjournal.wizardjournal.dto.LoginResponseDto;
+import com.samarth.wizardjournal.wizardjournal.dto.AuthResponseDto;
 import com.samarth.wizardjournal.wizardjournal.dto.SignupRequestDto;
+import com.samarth.wizardjournal.wizardjournal.models.RefreshToken;
 import com.samarth.wizardjournal.wizardjournal.models.User;
+import com.samarth.wizardjournal.wizardjournal.repository.RefreshTokenRepository;
 import com.samarth.wizardjournal.wizardjournal.repository.UserRepository;
 import com.samarth.wizardjournal.wizardjournal.utils.AuthUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,25 +21,17 @@ public class AuthService {
     private final AuthUtil authUtil;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final RefreshTokenRepository tokenRepository;
 
-    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
-        try {
-            var a = new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword());
-            var authentication = authenticationManager.authenticate(
-                    a
-            );
+    public AuthResponseDto login(LoginRequestDto loginRequestDto) {
+        var authToken = new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword());
+        var authentication = authenticationManager.authenticate(authToken);
 
-            User user = (User) authentication.getPrincipal();
-            String token = authUtil.generateAccessToken(user);
-            return new LoginResponseDto(token, user.getId());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Invalid email or password");
-        }
+        User user = (User) authentication.getPrincipal();
+        return issueTokens(user);
     }
 
-    public LoginResponseDto signup(SignupRequestDto signupRequestDto) {
+    public AuthResponseDto signup(SignupRequestDto signupRequestDto) {
         if(signupRequestDto.getName() == null || signupRequestDto.getEmail() == null || signupRequestDto.getPassword() == null) {
             throw new IllegalArgumentException("Name, email, and password must not be null");
         }
@@ -51,9 +45,43 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(signupRequestDto.getPassword()));
 
         user = userRepository.save(user);
+        return issueTokens(user);
+    }
 
-        String token = authUtil.generateAccessToken(user);
-        return new LoginResponseDto(token, user.getId());
+    public AuthResponseDto refreshToken(String refreshToken) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new IllegalArgumentException("Refresh token must not be null or empty");
+        }
+
+        Integer userId = authUtil.getUseridFromToken(refreshToken);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        var refTokenObj = tokenRepository.findByUserIdAndTokenAndRevokedFalse(user.getId(), refreshToken);
+        if (refTokenObj.isEmpty()) {
+            throw new IllegalArgumentException("Invalid or expired refresh token");
+        }
+
+        return issueTokens(user);
+    }
+
+    private AuthResponseDto issueTokens(User user) {
+        revokeOldTokens(user);
+
+        String accessToken = authUtil.generateAccessToken(user);
+        String refreshToken = authUtil.generateRefreshToken(user);
+
+        tokenRepository.save(new RefreshToken(refreshToken, user));
+
+        return new AuthResponseDto(accessToken, refreshToken);
+    }
+
+    private void revokeOldTokens(User user) {
+        var validTokens = tokenRepository.findByUserIdAndRevokedFalse(user.getId());
+        for (var t : validTokens) {
+            t.revoke();
+        }
+        tokenRepository.saveAll(validTokens);
     }
 }
 

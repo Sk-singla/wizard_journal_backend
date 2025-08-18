@@ -22,13 +22,21 @@ public class AuthUtil {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken(User user) {
+    private String generateToken(User user, Long ttl) {
         return Jwts.builder()
                 .subject(user.getId().toString())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000L *60*60*24*30))
+                .expiration(new Date(System.currentTimeMillis() + ttl))
                 .signWith(getSecretKey())
                 .compact();
+    }
+
+    public String generateAccessToken(User user) {
+        return generateToken(user, 1000L * 60 * 60 * 24); // 24 hours
+    }
+
+    public String generateRefreshToken(User user) {
+        return generateToken(user, 1000L * 60 * 60 * 24 * 30); // 30 days
     }
 
     public Integer getUseridFromToken(String token) {
