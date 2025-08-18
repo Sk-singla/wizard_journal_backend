@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: springboot-api
+    env: docker
+    repo: https://github.com/Sk-singla/wizard_journal_backend
+    region: oregon
+    plan: free
+    envVars:
+      - key: DB_URL
+        fromDatabase:
+          name: springboot-db
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: springboot-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: springboot-db
+          property: password
+databases:
+  - name: springboot-db
+    region: oregon
