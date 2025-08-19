@@ -44,5 +44,9 @@ public class JournalService {
                 .toList();
     }
 
-
+    public JournalDto insertJournal(JournalDto journalDto) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Journal journal = Journal.fromJournalDto(journalDto, user);
+        return JournalDto.fromJournal(journalRepository.save(journal));
+    }
 }

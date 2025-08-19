@@ -1,6 +1,7 @@
 package com.samarth.wizardjournal.wizardjournal.models;
 
 import com.samarth.wizardjournal.wizardjournal.dto.BackgroundInfo;
+import com.samarth.wizardjournal.wizardjournal.dto.JournalDto;
 import com.samarth.wizardjournal.wizardjournal.dto.JournalTheme;
 import com.samarth.wizardjournal.wizardjournal.models.converters.BackgroundInfoConverter;
 import com.samarth.wizardjournal.wizardjournal.models.converters.JournalThemeConverter;
@@ -41,6 +42,17 @@ public class Journal {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public static Journal fromJournalDto(JournalDto journalDto, User user) {
+        return new Journal(
+                journalDto.getTitle(),
+                journalDto.getContent(),
+                journalDto.getDate(),
+                journalDto.getTheme(),
+                journalDto.getBackgroundInfo(),
+                user
+        );
+    }
 
     @PrePersist
     protected void onCreate() {

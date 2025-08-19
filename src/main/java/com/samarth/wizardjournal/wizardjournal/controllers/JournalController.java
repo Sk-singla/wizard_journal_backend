@@ -25,4 +25,9 @@ public class JournalController {
     public ResponseEntity<List<JournalDto>> getAllJournals() {
         return ResponseEntity.ok(journalService.getAllJournals());
     }
+
+    @PostMapping("/insert")
+    public ResponseEntity<JournalDto> insertJournal(@RequestBody JournalDto journalDto) {
+        return ResponseEntity.ok(journalService.insertJournal(journalDto));
+    }
 }
