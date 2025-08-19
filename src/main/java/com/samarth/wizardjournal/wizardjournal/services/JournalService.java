@@ -49,4 +49,30 @@ public class JournalService {
         Journal journal = Journal.fromJournalDto(journalDto, user);
         return JournalDto.fromJournal(journalRepository.save(journal));
     }
+
+    // insert multiple journals
+    public List<JournalDto> insertJournals(List<JournalDto> journalDtos)
+    {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Journal> journals = journalDtos.stream()
+                .map(journalDto -> Journal.fromJournalDto(journalDto, user))
+                .toList();
+        return journalRepository.saveAll(journals).stream()
+                .map(JournalDto::fromJournal)
+                .toList();
+    }
+
+    // delete journal by id
+    public void deleteJournalById(Integer id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalArgumentException("User is not authenticated");
+        }
+
+        User user = (User) authentication.getPrincipal();
+        Journal journal = journalRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Journal not found or does not belong to the user"));
+
+        journalRepository.delete(journal);
+    }
 }

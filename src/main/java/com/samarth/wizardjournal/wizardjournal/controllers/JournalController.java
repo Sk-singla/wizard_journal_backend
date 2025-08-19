@@ -30,4 +30,16 @@ public class JournalController {
     public ResponseEntity<JournalDto> insertJournal(@RequestBody JournalDto journalDto) {
         return ResponseEntity.ok(journalService.insertJournal(journalDto));
     }
+
+    @PostMapping("/insertMany")
+    public ResponseEntity<List<JournalDto>> insertJournals(@RequestBody List<JournalDto> journalDtos) {
+        return ResponseEntity.ok(journalService.insertJournals(journalDtos));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteJournal(@PathVariable Integer id) {
+        journalService.deleteJournalById(id);
+        return ResponseEntity.noContent().build();
+    }
+    
 }
