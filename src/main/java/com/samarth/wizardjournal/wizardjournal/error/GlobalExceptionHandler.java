@@ -1,5 +1,6 @@
 package com.samarth.wizardjournal.wizardjournal.error;
 
+import com.samarth.wizardjournal.wizardjournal.services.RateLimiterService;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,5 +42,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleGenericException(Exception ex) {
         ApiError apiError = new ApiError("An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(RateLimiterService.RateLimitExceededException.class)
+    public ResponseEntity<ApiError> handleRateLimitExceededException(RateLimiterService.RateLimitExceededException ex) {
+        ApiError apiError = new ApiError("Rate limit exceeded: " + ex.getMessage(), HttpStatus.TOO_MANY_REQUESTS);
+        return new ResponseEntity<>(apiError, HttpStatus.TOO_MANY_REQUESTS);
     }
 }
