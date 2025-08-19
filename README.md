@@ -1,6 +1,8 @@
 # Wizard Journal - AI Powered Journal App
 
 Wizard Journal is a Spring Boot application that allows users to create and manage their journals with the help of AI. The application leverages the power of Google's Gemini API to generate journal entries based on user prompts.
+Hosted on render: https://wizard-journal-backend.onrender.com
+Android app repo: https://github.com/Sk-singla/WizardJournal
 
 ## Tech Stack
 
