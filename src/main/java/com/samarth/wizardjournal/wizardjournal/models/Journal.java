@@ -45,6 +45,7 @@ public class Journal {
 
     public static Journal fromJournalDto(JournalDto journalDto, User user) {
         return new Journal(
+                journalDto.getId(),
                 journalDto.getTitle(),
                 journalDto.getContent(),
                 journalDto.getDate(),
@@ -71,5 +72,10 @@ public class Journal {
         this.theme = theme;
         this.backgroundInfo = backgroundInfo;
         this.user = user;
+    }
+
+    public Journal(Integer id, String title, String content, Long date, JournalTheme theme, BackgroundInfo backgroundInfo, User user) {
+        this(title, content, date, theme, backgroundInfo, user);
+        this.id = id;
     }
 }

@@ -32,6 +32,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+                .cors(cors -> cors.configurationSource(request -> {
+                    var coras = new org.springframework.web.cors.CorsConfiguration();
+                    coras.addAllowedOriginPattern("*");
+                    coras.addAllowedHeader("*");
+                    coras.addAllowedMethod("*");
+                    coras.setAllowCredentials(true);
+                    return coras;
+                }))
                 .csrf(csrfConfig -> csrfConfig.disable())
                 .sessionManagement(sessionConfig ->
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -44,6 +52,7 @@ public class SecurityConfig {
                         exceptionHandlingConfigurer.accessDeniedHandler((request, response, accessDeniedException) -> {
                             handlerExceptionResolver.resolveException(request, response, null, accessDeniedException);
                         }));
+                // allow cors all origin
         return httpSecurity.build();
     }
 }
