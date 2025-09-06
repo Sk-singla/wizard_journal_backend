@@ -21,7 +21,8 @@ public class JournalController {
 
     @PostMapping("/generate")
     public ResponseEntity<JournalDto> generateJournal(HttpServletRequest httpRequest, @RequestBody GenerateJournalRequestDto request) throws JsonProcessingException {
-        rateLimiterService.limitPerUser(httpRequest);
+        rateLimiterService.limitPerIp(httpRequest, 2);
+//        rateLimiterService.limitPerUser(httpRequest);
         return ResponseEntity.ok(journalService.generateJournal(request));
     }
 
