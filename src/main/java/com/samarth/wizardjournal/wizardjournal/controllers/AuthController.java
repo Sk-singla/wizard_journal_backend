@@ -42,4 +42,10 @@ public class AuthController {
         AuthResponseDto response = authService.refreshToken(refreshToken);
         return ResponseEntity.ok(response);
     }
+
+    // ping
+    @PostMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
+    }
 }
